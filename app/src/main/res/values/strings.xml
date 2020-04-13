@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Upscale</string>
+
+
+    <string name="bluetooth_status">Bluetooth: </string>
+    <string name="bluetooth_settings">C</string>
+    <string name="bluetooth_retry">Retry</string>
+
+    <string name="status_connect">connected</string>
+    <string name="status_searching">searching...</string>
+    <string name="status_error">error</string>
+    <string name="status_disconnect">not connected</string>
+    <string name="status_not_found">no scale found</string>
+    <string name="status_found">scale found</string>
+    <string name="status_no_bluetooth">disabled</string>
 </resources>
