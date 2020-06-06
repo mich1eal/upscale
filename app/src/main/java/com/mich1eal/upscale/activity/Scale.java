@@ -1,4 +1,4 @@
-package com.mich1eal.upscale.activities;
+package com.mich1eal.upscale.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -40,20 +40,18 @@ public class Scale extends Activity {
 
         //Handler is static to prevent memory leaks. See:
         // http://stackoverflow.com/questions/11278875/handlers-and-memory-leaks-in-android
-        bWrap = new BLEWrapper(this, new BHandler(), false);
+        bWrap = new BLEWrapper(this, new BHandler());
     }
 
 
-    static class BHandler extends Handler
-    {
+    static class BHandler extends Handler {
         @Override
-        public void handleMessage(Message inputMessage)
-        {
+        public void handleMessage(Message inputMessage) {
             Log.d(TAG, "Message recieved: " + inputMessage.what);
             int msg = R.string.status_error;
             boolean connected = false;
-            switch (inputMessage.what)
-            {
+            switch (inputMessage.what) {
+
                 case BLEWrapper.STATE_SEARCHING:
                     msg = R.string.status_searching;
                     retryButton.setEnabled(false);
@@ -63,15 +61,15 @@ public class Scale extends Activity {
                     retryButton.setEnabled(false);
                     connected = true;
                     break;
-                case BLEWrapper.STATE_NO_BLUETOOTH:
-                    msg = R.string.status_no_bluetooth;
+                case BLEWrapper.STATE_DISABLED:
+                    msg = R.string.status_disabled;
                     retryButton.setEnabled(true);
                     break;
                 case BLEWrapper.STATE_DISCONNECTED:
                     msg = R.string.status_disconnect;
                     retryButton.setEnabled(true);
                     break;
-                case BLEWrapper.STATE_FOUND:
+                case BLEWrapper.STATE_CONNECTING:
                     msg = R.string.status_found;
                     retryButton.setEnabled(false);
                     break;
@@ -80,11 +78,9 @@ public class Scale extends Activity {
                     retryButton.setEnabled(true);
             }
 
-            if (connected)
-            {
+            if (connected) {
             }
-            else
-            {
+            else {
             }
 
             statusText.setText(msg);
@@ -92,17 +88,14 @@ public class Scale extends Activity {
     }
 
     @Override
-    public void onPause()
-    {
-        bWrap.close();
+    public void onPause() {
         super.onPause();
+        bWrap.disconnect();
     }
 
     @Override
-    public void onResume()
-    {
-        if (bWrap != null && bWrap.getState() == bWrap.STATE_DISCONNECTED)
-        {
+    public void onResume(){
+        if (bWrap != null && bWrap.getState() == bWrap.STATE_DISCONNECTED) {
             bWrap.connect();
         }
 

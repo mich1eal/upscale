@@ -12,5 +12,5 @@
     <string name="status_disconnect">not connected</string>
     <string name="status_not_found">no scale found</string>
     <string name="status_found">scale found</string>
-    <string name="status_no_bluetooth">disabled</string>
+    <string name="status_disabled">disabled</string>
 </resources>
