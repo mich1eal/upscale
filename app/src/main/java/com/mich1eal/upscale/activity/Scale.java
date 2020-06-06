@@ -66,14 +66,16 @@ public class Scale extends Activity {
                 case BLEWrapper.STATE_DISCONNECTED:
                     //There are several explanations for being disconnected
 
+                    final int disable = bWrap.getDisableType();
+
                     //Bluetooth turned off
-                    if (bWrap.disableType == BLEWrapper.ERROR_BLUETOOTH_DISABLED) msg = R.string.status_disabled;
+                    if (disable == BLEWrapper.ERROR_BLUETOOTH_DISABLED) msg = R.string.status_disabled;
                     //Location permission not granted
-                    else if (bWrap.disableType == BLEWrapper.ERROR_LOCATION_DISABLED) msg = R.string.status_location_disabled;
+                    else if (disable == BLEWrapper.ERROR_LOCATION_DISABLED) msg = R.string.status_location_disabled;
                     //Device doesnt have BLE
-                    else if (bWrap.disableType == BLEWrapper.ERROR_NOT_SUPPORTED) msg = R.string.status_not_available;
+                    else if (disable == BLEWrapper.ERROR_NOT_SUPPORTED) msg = R.string.status_not_available;
                     //Sepcial case where disconnection is due to search timeout
-                    else if (bWrap.lastSearchTimeout) msg = R.string.status_not_found;
+                    else if (bWrap.getLastSearchTimeout()) msg = R.string.status_not_found;
                     //Default "not connected" message
                     else msg = R.string.status_disconnect;
 

@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.Message;
 import android.os.ParcelUuid;
 import android.util.Log;
 
@@ -33,9 +34,10 @@ public class BLEWrapper
     private static final String TAG = BLEWrapper.class.getSimpleName();
 
 
-    private static final String UUID_SERVICE_SCALE =    "f52ce065-6405-4cc0-a9eb-60e04533fa48";
-    private static final String UUID_CHAR_WEIGHT =      "bab027df-7e05-4358-9c2c-53596d940bef";
-    private static final String UUID_CHAR_BATTERY =     "4c1a2005-a529-4574-9eed-96e7e520f9c5";
+    //Constants
+    private static final UUID UUID_SERVICE_SCALE = UUID.fromString("f52ce065-6405-4cc0-a9eb-60e04533fa48");
+    private static final UUID UUID_CHAR_WEIGHT = UUID.fromString("bab027df-7e05-4358-9c2c-53596d940bef");
+    private static final UUID UUID_CHAR_BATTERY = UUID.fromString("4c1a2005-a529-4574-9eed-96e7e520f9c5");
 
     //Scan times out after 5 seconds
     private static final int SCAN_PERIOD = 5000;
@@ -51,16 +53,25 @@ public class BLEWrapper
     public static final int ERROR_NOT_SUPPORTED = 2;
     public static final int ERROR_LOCATION_DISABLED = 3;
 
-    public int disableType;
+    public static final int MESSAGE_STATE = 1;
+    public static final int MESSAGE_VALUE = 2;
+
+
+    //Exposed status fields
+    private int disableType;
     //indicates whether the most recent searched timed out
-    public boolean lastSearchTimeout = false;
+    private boolean lastSearchTimeout = false;
+    //
+    private boolean hasWeight = false;
+    private boolean hasBattery = false;
+
+
 
     //used internally to determine if current search timed out
     private boolean currentSearchTimeout = false;
     private boolean timeoutActive = false;
 
     private int state;
-
 
     private Context context;
     private BluetoothAdapter bAdapter;
@@ -70,80 +81,6 @@ public class BLEWrapper
     private Handler handler;
     private List<ScanFilter> bFilterList;
     private ScanSettings bScanSettings;
-
-
-
-    final ScanCallback bScanCallback = new ScanCallback() {
-        @Override
-        public void onScanResult(int callbackType, ScanResult result) {
-            Log.d(TAG, "Found a device: " + result.getRssi());
-
-
-            //if we find a valid device, connect to it
-            if (true)
-            {
-                bDevice = result.getDevice();
-                setState(STATE_CONNECTING);
-            }
-        }
-    };
-
-    private final BluetoothGattCallback bGattCallback = new BluetoothGattCallback() {
-
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            String intentAction = null;
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.d(TAG, "Connected to GATT server.");
-                bGatt.discoverServices();
-
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d(TAG, "Disconnected from GATT server.");
-                setState(STATE_DISCONNECTED);
-
-            } else {
-                Log.e(TAG, "Error, unexpected status");
-                setState(STATE_DISCONNECTED);
-            }
-        }
-
-        @Override
-        public void onServicesDiscovered(final BluetoothGatt gatt, final int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d(TAG, "GattServices discovered");
-                for (BluetoothGattService service : gatt.getServices()) {
-                    if (service.getUuid().equals(UUID.fromString(UUID_SERVICE_SCALE))) {
-                        Log.d(TAG, "Found Scale service");
-                        setState(STATE_CONNECTED);
-                        for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()){
-                            characteristic
-                            Log.d(TAG, "Founc char: " + characteristic.getUuid() + " with value " + characteristic.getStringValue(0));
-
-                        }
-                    }
-                }
-            }
-            else {
-                Log.e(TAG, "Service discovery not successful. Status: " + status);
-                setState(STATE_DISCONNECTED);
-            }
-        }
-
-        @Override
-        // Result of a characteristic read operation
-        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d(TAG, "Characteristic Read");
-            }
-        }
-
-        @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            Log.d(TAG, "Received characteristics changed event : " + characteristic.getUuid() + "is now set to: " + characteristic.getStringValue(0));
-        }
-
-
-    };
 
     public BLEWrapper(Context context, Handler handler)
     {
@@ -158,7 +95,7 @@ public class BLEWrapper
         //Set up scan filter
         bFilterList = new ArrayList<>();
         final ScanFilter filter = new ScanFilter.Builder()
-                .setServiceUuid(ParcelUuid.fromString(UUID_SERVICE_SCALE))
+                .setServiceUuid(new ParcelUuid(UUID_SERVICE_SCALE))
                 .build();
         bFilterList.add(filter);
 
@@ -184,6 +121,10 @@ public class BLEWrapper
     {
         return state;
     }
+    public int getDisableType() { return disableType;}
+    public boolean getLastSearchTimeout() {return lastSearchTimeout;}
+    public boolean hasWeight() {return hasWeight;}
+    public boolean isHasBattery() {return hasBattery;}
 
     private void setState(int newState)
     {
@@ -270,6 +211,18 @@ public class BLEWrapper
         }
     }
 
+    //ScanCallback used in startScan and stopScan
+    final ScanCallback bScanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            Log.d(TAG, "Found a device: " + result.getRssi());
+
+            // The scan has already been filtered, so any device that we find is gauranteed to have a service with our UUID
+            bDevice = result.getDevice();
+            setState(STATE_CONNECTING);
+        }
+    };
+
     private void startScan() {
         timeoutActive = true;
         Handler scanHandler = new Handler();
@@ -303,15 +256,114 @@ public class BLEWrapper
         });
     }
 
+    private final BluetoothGattCallback bGattCallback = new BluetoothGattCallback() {
+
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            String intentAction = null;
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                Log.d(TAG, "Connected to GATT server.");
+                bGatt.discoverServices();
+
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                Log.d(TAG, "Disconnected from GATT server.");
+                setState(STATE_DISCONNECTED);
+
+            } else {
+                Log.e(TAG, "Error, unexpected status");
+                setState(STATE_DISCONNECTED);
+            }
+        }
+
+        @Override
+        public void onServicesDiscovered(final BluetoothGatt gatt, final int status) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.d(TAG, "GattServices discovered");
+                for (BluetoothGattService service : gatt.getServices()) {
+                    if (service.getUuid().equals(UUID_SERVICE_SCALE)) {
+                        Log.d(TAG, "Found Scale service");
+                        setState(STATE_CONNECTED);
+                        for (BluetoothGattCharacteristic charact : service.getCharacteristics()) {
+                            if (charact.getUuid().equals(UUID_CHAR_WEIGHT)) {
+                                Log.d(TAG, "Found Weight Characteristic");
+                                hasBattery = true;
+                                gatt.readCharacteristic(charact);
+                                gatt.setCharacteristicNotification(charact, true);
+                            }
+                            else if (charact.getUuid().equals(UUID_CHAR_BATTERY)){
+                                hasWeight = true;
+                                Log.d(TAG, "Found Battery Characteristic");
+                                gatt.readCharacteristic(charact);
+                                gatt.setCharacteristicNotification(charact, true);
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                Log.e(TAG, "Service discovery not successful. Status: " + status);
+                setState(STATE_DISCONNECTED);
+            }
+        }
+
+        @Override
+        // Result of a characteristic read operation
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+
+                if(characteristic.getUuid().equals(UUID_CHAR_WEIGHT)){
+                    sendValueMessage();
+
+                }
+                else if (characteristic.getUuid().equals(UUID_CHAR_WEIGHT))
+                {
+
+                }
+
+
+                Log.d(TAG, "Characteristic Read");
+            }
+        }
+
+        @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+            Log.d(TAG, "Received characteristics changed event : " + characteristic.getUuid() + "is now set to: " + characteristic.getStringValue(0));
+        }
+    };
+
     private void connectDevice(BluetoothDevice device)
     {
         bGatt = device.connectGatt(context, true, bGattCallback);
-        //bGatt.setCharacteristicNotification(bCharacteristic);
     }
 
     private void disconnectDevice()
     {
+        hasWeight = false;
+        hasBattery = false;
         if (bGatt != null) bGatt.close();
         bGatt = null;
     }
+
+    private void sendStateMessage(int state)
+    {
+        if (handler == null) {
+            Log.e(TAG, "Attempted to send message with null handler");
+            return;
+        }
+        //sends a message with "What" field set to MESSAGE_STATE and the current state as arg1
+        final Message msg = Message.obtain(handler, MESSAGE_STATE, state, 0);
+        handler.sendMessage(msg);
+    }
+
+    private void sendValueMessage(int what, double value)
+    {
+        if (handler == null) {
+            Log.e(TAG, "Attempted to send message with null handler");
+            return;
+        }
+        final Message msg = Message.obtain(handler, MESSAGE_VALUE, Double.valueOf(value));
+        handler.sendMessage(msg);
+    }
+
+
 }
