@@ -41,13 +41,15 @@ public class Scale extends Activity {
         //Handler is static to prevent memory leaks. See:
         // http://stackoverflow.com/questions/11278875/handlers-and-memory-leaks-in-android
         bWrap = new BLEWrapper(this, new BHandler());
+
+        bWrap.connect();
     }
 
 
     static class BHandler extends Handler {
         @Override
         public void handleMessage(Message inputMessage) {
-            Log.d(TAG, "Message recieved: " + inputMessage.what);
+            //Log.d(TAG, "Message recieved: " + inputMessage.what);
             int msg = R.string.status_error;
             boolean connected = false;
             switch (inputMessage.what) {
@@ -61,12 +63,20 @@ public class Scale extends Activity {
                     retryButton.setEnabled(false);
                     connected = true;
                     break;
-                case BLEWrapper.STATE_DISABLED:
-                    msg = R.string.status_disabled;
-                    retryButton.setEnabled(true);
-                    break;
                 case BLEWrapper.STATE_DISCONNECTED:
-                    msg = R.string.status_disconnect;
+                    //There are several explanations for being disconnected
+
+                    //Bluetooth turned off
+                    if (bWrap.disableType == BLEWrapper.ERROR_BLUETOOTH_DISABLED) msg = R.string.status_disabled;
+                    //Location permission not granted
+                    else if (bWrap.disableType == BLEWrapper.ERROR_LOCATION_DISABLED) msg = R.string.status_location_disabled;
+                    //Device doesnt have BLE
+                    else if (bWrap.disableType == BLEWrapper.ERROR_NOT_SUPPORTED) msg = R.string.status_not_available;
+                    //Sepcial case where disconnection is due to search timeout
+                    else if (bWrap.lastSearchTimeout) msg = R.string.status_not_found;
+                    //Default "not connected" message
+                    else msg = R.string.status_disconnect;
+
                     retryButton.setEnabled(true);
                     break;
                 case BLEWrapper.STATE_CONNECTING:
