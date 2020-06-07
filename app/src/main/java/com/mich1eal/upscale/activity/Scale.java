@@ -85,7 +85,11 @@ public class Scale extends Activity {
                 else if (bWrap.getLastSearchTimeout()) msg = R.string.status_not_found;
                     //Default "not connected" message
                 else msg = R.string.status_disconnect;
+
                 retryButton.setEnabled(true);
+                weightText.setText(R.string.weight_default);
+                batteryText.setText(R.string.battery_default);
+
                 break;
             case BLEWrapper.STATE_CONNECTING:
                 msg = R.string.status_found;
@@ -122,8 +126,6 @@ public class Scale extends Activity {
     static class BHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-
-            // TODO: 6/6/2020 implement new messaging format
 
             boolean connected = false;
             switch (msg.what) {

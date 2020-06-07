@@ -22,6 +22,8 @@ import android.os.Message;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -303,24 +305,18 @@ public class BLEWrapper
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d(TAG, "Characteristic Read");
-
-                int charact = -1;
-                if(characteristic.getUuid().equals(UUID_CHAR_WEIGHT)) charact = VALUE_WEIGHT;
-                else if (characteristic.getUuid().equals(UUID_CHAR_WEIGHT)) charact = VALUE_BATTERY;
-                else {
-                Log.e(TAG, "Unexpected characteristic read: " + characteristic.getUuid());
+                if(characteristic.getUuid().equals(UUID_CHAR_WEIGHT) || characteristic.getUuid().equals(UUID_CHAR_BATTERY)){
+                    sendCharacteristic(characteristic);
                 }
-                Log.d(TAG, "Read characteristic: " + characteristic.getStringValue(0));
-
-
-                sendValueMessage(charact, Double.valueOf(characteristic.getStringValue(0)));
-
             }
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            Log.d(TAG, "Received characteristics changed event : " + characteristic.getUuid() + "is now set to: " + characteristic.getStringValue(0));
+            Log.d(TAG, "Characteristic Changed");
+            if(characteristic.getUuid().equals(UUID_CHAR_WEIGHT) || characteristic.getUuid().equals(UUID_CHAR_BATTERY)){
+                sendCharacteristic(characteristic);
+            }
         }
     };
 
@@ -346,14 +342,33 @@ public class BLEWrapper
         handler.sendMessage(msg);
     }
 
-    private void sendValueMessage(int charact, double value)
+    private void sendCharacteristic(BluetoothGattCharacteristic characteristic)
+    {
+        Log.d(TAG, "Sending ");
+
+        int charID = -1;
+        if(characteristic.getUuid().equals(UUID_CHAR_WEIGHT)) charID = VALUE_WEIGHT;
+        else if (characteristic.getUuid().equals(UUID_CHAR_WEIGHT)) charID = VALUE_BATTERY;
+        else {
+            Log.e(TAG, "Unexpected characteristic read: " + characteristic.getUuid());
+        }
+
+        final byte[] data = characteristic.getValue();
+        float val = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+
+        Log.d(TAG, "Sending characteristic: " + val);
+        sendValueMessage(charID, val);
+    }
+
+
+    private void sendValueMessage(int charID, double value)
     {
         if (handler == null) {
             Log.e(TAG, "Attempted to send message with null handler");
             return;
         }
         // sends a message with "What" field set to MESSAGE_VALUE,  arg1 as the character sent, and a double object for char
-        final Message msg = Message.obtain(handler, MESSAGE_VALUE, charact, 0, Double.valueOf(value));
+        final Message msg = Message.obtain(handler, MESSAGE_VALUE, charID, 0, Double.valueOf(value));
         handler.sendMessage(msg);
     }
 
