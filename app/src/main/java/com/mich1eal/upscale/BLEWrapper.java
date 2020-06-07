@@ -56,16 +56,14 @@ public class BLEWrapper
     public static final int MESSAGE_STATE = 1;
     public static final int MESSAGE_VALUE = 2;
 
+    public static final int VALUE_WEIGHT = 1;
+    public static final int VALUE_BATTERY = 2;
+
 
     //Exposed status fields
     private int disableType;
     //indicates whether the most recent searched timed out
     private boolean lastSearchTimeout = false;
-    //
-    private boolean hasWeight = false;
-    private boolean hasBattery = false;
-
-
 
     //used internally to determine if current search timed out
     private boolean currentSearchTimeout = false;
@@ -123,8 +121,6 @@ public class BLEWrapper
     }
     public int getDisableType() { return disableType;}
     public boolean getLastSearchTimeout() {return lastSearchTimeout;}
-    public boolean hasWeight() {return hasWeight;}
-    public boolean isHasBattery() {return hasBattery;}
 
     private void setState(int newState)
     {
@@ -177,9 +173,7 @@ public class BLEWrapper
 
         this.state = newState;
         Log.d(TAG, "State set to: " + newState);
-        if (handler != null) {
-            handler.sendEmptyMessage(newState);
-        }
+        sendStateMessage(newState);
     }
 
     private boolean hasBLECapability(Context context)
@@ -286,12 +280,10 @@ public class BLEWrapper
                         for (BluetoothGattCharacteristic charact : service.getCharacteristics()) {
                             if (charact.getUuid().equals(UUID_CHAR_WEIGHT)) {
                                 Log.d(TAG, "Found Weight Characteristic");
-                                hasBattery = true;
                                 gatt.readCharacteristic(charact);
                                 gatt.setCharacteristicNotification(charact, true);
                             }
                             else if (charact.getUuid().equals(UUID_CHAR_BATTERY)){
-                                hasWeight = true;
                                 Log.d(TAG, "Found Battery Characteristic");
                                 gatt.readCharacteristic(charact);
                                 gatt.setCharacteristicNotification(charact, true);
@@ -310,18 +302,19 @@ public class BLEWrapper
         // Result of a characteristic read operation
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-
-                if(characteristic.getUuid().equals(UUID_CHAR_WEIGHT)){
-                    sendValueMessage();
-
-                }
-                else if (characteristic.getUuid().equals(UUID_CHAR_WEIGHT))
-                {
-
-                }
-
-
                 Log.d(TAG, "Characteristic Read");
+
+                int charact = -1;
+                if(characteristic.getUuid().equals(UUID_CHAR_WEIGHT)) charact = VALUE_WEIGHT;
+                else if (characteristic.getUuid().equals(UUID_CHAR_WEIGHT)) charact = VALUE_BATTERY;
+                else {
+                Log.e(TAG, "Unexpected characteristic read: " + characteristic.getUuid());
+                }
+                Log.d(TAG, "Read characteristic: " + characteristic.getStringValue(0));
+
+
+                sendValueMessage(charact, Double.valueOf(characteristic.getStringValue(0)));
+
             }
         }
 
@@ -338,8 +331,6 @@ public class BLEWrapper
 
     private void disconnectDevice()
     {
-        hasWeight = false;
-        hasBattery = false;
         if (bGatt != null) bGatt.close();
         bGatt = null;
     }
@@ -355,13 +346,14 @@ public class BLEWrapper
         handler.sendMessage(msg);
     }
 
-    private void sendValueMessage(int what, double value)
+    private void sendValueMessage(int charact, double value)
     {
         if (handler == null) {
             Log.e(TAG, "Attempted to send message with null handler");
             return;
         }
-        final Message msg = Message.obtain(handler, MESSAGE_VALUE, Double.valueOf(value));
+        // sends a message with "What" field set to MESSAGE_VALUE,  arg1 as the character sent, and a double object for char
+        final Message msg = Message.obtain(handler, MESSAGE_VALUE, charact, 0, Double.valueOf(value));
         handler.sendMessage(msg);
     }
 

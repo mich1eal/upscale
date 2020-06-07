@@ -6,6 +6,11 @@
     <string name="bluetooth_settings">C</string>
     <string name="bluetooth_retry">Retry</string>
 
+    <string name="weight_default">Scale weight reading: not available</string>
+    <string name="battery_default">Scale battery level: not available</string>
+
+
+
     <string name="status_connect">connected</string>
     <string name="status_searching">searching...</string>
     <string name="status_error">error</string>

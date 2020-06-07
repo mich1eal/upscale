@@ -41,6 +41,25 @@
             android:id="@+id/control_retry"
             android:text="@string/bluetooth_retry"/>
 
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/weight_text"
+            android:text="@string/weight_default"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/control_status_text"
+            android:layout_margin="5dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/battery_text"
+            android:text="@string/battery_default"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/weight_text"
+            android:layout_margin="5dp"/>
+
     </RelativeLayout>
 
 
