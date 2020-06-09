@@ -78,7 +78,9 @@ public class Scale extends Activity {
                 //There are several explanations for being disconnected
                 final int disable = bWrap.getDisableType();
                 //Location permission not granted
-                if (disable == BLEWrapper.ERROR_LOCATION_DISABLED) msg = R.string.status_location_disabled;
+                if (disable == BLEWrapper.ERROR_BLUETOOTH_DISABLED) msg = R.string.status_disabled;
+                //Location permission not granted
+                else if (disable == BLEWrapper.ERROR_LOCATION_DISABLED) msg = R.string.status_location_disabled;
                 //Device doesnt have BLE
                 else if (disable == BLEWrapper.ERROR_NOT_SUPPORTED) msg = R.string.status_not_available;
                     //Sepcial case where disconnection is due to search timeout

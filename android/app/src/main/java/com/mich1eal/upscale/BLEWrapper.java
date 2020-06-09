@@ -126,7 +126,6 @@ public class BLEWrapper
 
     private void setState(int newState)
     {
-
         Log.d(TAG, "State commanded to: " + newState);
 
         if (newState == state) {
@@ -140,7 +139,6 @@ public class BLEWrapper
         }
 
         switch(newState){
-
             case STATE_DISCONNECTED:
                 stopScanning();
                 if (bDevice != null) disconnectDevice();
