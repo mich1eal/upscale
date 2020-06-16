@@ -83,3 +83,7 @@ android/lint/generated/
 android/lint/outputs/
 android/lint/tmp/
 # lint/reports/
+
+
+# create databases
+python/data/
