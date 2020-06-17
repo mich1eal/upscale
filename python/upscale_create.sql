@@ -37,7 +37,7 @@ CREATE TABLE [ingredients] (
   [name] text				NOT NULL,
   [description] text,
   [unit_id] integer,
-  [weight] real				NOT NULL,
+  [weight] real,
   [density] real			NOT NULL,
 
   FOREIGN KEY ([unit_id]) REFERENCES [units] ([id]),

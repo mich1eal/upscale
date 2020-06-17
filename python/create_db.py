@@ -38,7 +38,7 @@ def execute_sql(conn, sql):
 
 
 def main():
-    database = r'C:\Users\msmil\workspaces_local\upscale\python\data\upscale.db'
+    database = r'C:\Users\msmil\workspaces_local\upscale\python\data\out\upscale.db'
 
 
 
