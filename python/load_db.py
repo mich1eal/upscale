@@ -37,6 +37,41 @@ def execute_sql(conn, sql):
     except Error as e:
         print(e)
 
+def getStepTypeIDs(conn):
+    try:
+        c = conn.cursor()
+        c.execute('SELECT name, id FROM step_types')
+        IDs = c.fetchall()
+    except Error as e:
+        print(e)
+
+    print ('Fetched {count} step_type objects'.format(count=len(IDs)))
+    return dict(IDs)
+
+def getUnitIDs(conn):
+    try:
+        c = conn.cursor()
+        c.execute('SELECT name, id FROM units')
+        IDs = c.fetchall()
+    except Error as e:
+        print(e)
+
+    print ('Fetched {count} unit objects'.format(count=len(IDs)))
+    return dict(IDs)
+
+def isNumber(val):
+    try:
+        float(val)
+        return True
+    except:
+        return False
+
+def isInt(val):
+    try:
+        return float(val).is_integer()
+    except:
+        return False
+
 
 def main():
     database = r'C:\Users\msmil\workspaces_local\upscale\python\data\out\upscale.db'
@@ -44,40 +79,82 @@ def main():
     # create a database connection
     conn = create_connection(database)
 
-    with open(r'data\in\ingredients.csv', 'r') as file:
-        reader = csv.reader(file)
-        headers = next(reader)
+    tables = ['step_types', 'steps', 'units', 'ingredients']
 
-        #Iterate through row and build SQL statement 
-        for row in reader: 
+    sqlStart = 'INSERT INTO '
+    sqlMid1 ='('
+    sqlMid2 = ') VALUES('
+    sqlEnd =  ');'
 
-            #We will use this to build our SQL insert statement 
-            sqlStart = 'INSERT INTO ingredients('
-            sqlMid = ') VALUES('
-            sqlEnd =  ');'
-            cols = []
-            vals = []
+    stepTypeDict = {}
+    unitDict = {}
 
-            for i in range(len(row)):
-                if row[i].strip():
-                    cols.append(headers[i])
-                    val = row[i]
-                    try:
-                    	float(val)
-                    except:
-                    	val = "\"" + val + "\""
 
-                    vals.append(val)
+    for table in tables: 
+        filePath = 'data\\in\\' + table + '.csv'
 
-            sqlString = sqlStart + ', '.join(cols) + sqlMid + ', '.join(vals) + sqlEnd
+        with open(filePath, 'r') as file:
+            reader = csv.reader(file)
+            headers = next(reader)
 
-            # create tables
+            #Iterate through row and build SQL statement 
+            for row in reader: 
+
+                #We will use this to build our SQL insert statement 
+                cols = []
+                vals = []
+
+                for i in range(len(row)):
+                    if row[i].strip():
+                        val = row[i]
+                        col = headers[i]
+
+                        # if this is a foreign key, replace it
+                        if col == 'step_type_id':
+                            val = stepTypeDict[val]
+                        elif col == 'unit_id':
+                            val = unitDict[val]
+
+                        if isInt(val):
+                            #get rid of decimal point
+                            val = int(val)
+                        elif isNumber(val):
+                            #cast to float
+                            val = float(val)
+                        else:
+                            #otherwise val is string, wrap in quotes
+                            val = "\"" + val + "\""
+
+                        cols.append(col)
+                        vals.append(str(val))
+
+                sqlString = sqlStart + table + sqlMid1 + ', '.join(cols) + sqlMid2 + ', '.join(vals) + sqlEnd
+                print('created SQL: ' + sqlString)
+
+                # create tables
+                if conn is not None:
+                    # print(sqlString)
+                    execute_sql(conn, sqlString)
+
+                else:
+                    print("Error! cannot create the database connection.")
+
+
+            print("Attempting to commit changes")
             if conn is not None:
                 # print(sqlString)
-                execute_sql(conn, sqlString)
+                conn.commit()
 
             else:
                 print("Error! cannot create the database connection.")
+
+        # After updating db, get list of IDs for foreign keys
+        if table == 'step_types':
+            stepTypeDict = getStepTypeIDs(conn)
+
+        if table == 'units':
+            unitDict = getUnitIDs(conn)
+
 
 
 if __name__ == '__main__':
