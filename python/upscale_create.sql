@@ -20,10 +20,11 @@ CREATE TABLE [steps] (
 CREATE TABLE [recipes] (
 	[id] integer 				PRIMARY KEY,
 	[unit_id] integer,
-	[name] text         NOT NULL,
+	[name] text         		NOT NULL,
 	[description] text,
-	[units] integer			NOT NULL,
-	[weight] double			NOT NULL,
+	[unit_weight] integer		NOT NULL,
+	[unit_count] integer		NOT NULL,
+	[weight] double				NOT NULL,
 	[density] double,
 
 	FOREIGN KEY ([unit_id]) REFERENCES [units] ([id]),
@@ -37,12 +38,19 @@ CREATE TABLE [ingredients] (
 	[name] text					NOT NULL,
 	[description] text,
 	[unit_id] integer,
-	[weight] real,
+	[unit_weight] real,
 	[density] real,
 
 	FOREIGN KEY ([unit_id]) REFERENCES [units] ([id]),
+
 	-- combination of these two fields must be unique
 	unique(name, description)
+
+	-- unit_weight and unit_id must both be either null or not null
+	CHECK ((unit_weight IS NULL AND unit_id IS NULL) OR (unit_weight IS NOT NULL and unit_id IS NOT NULL))
+
+	-- either weight or density must be filled
+	CHECK (density IS NOT NULL OR unit_weight IS NOT NULL)
 );
 
 CREATE TABLE [recipe_steps] (
