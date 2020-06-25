@@ -22,21 +22,20 @@ CREATE TABLE [recipes] (
 	[unit_id] integer,
 	[name] text         		NOT NULL,
 	[description] text,
-	[unit_weight] integer		NOT NULL,
+	[servings] integer			NOT NULL,
 	[unit_count] integer		NOT NULL,
 	[weight] double				NOT NULL,
-	[density] double,
 
 	FOREIGN KEY ([unit_id]) REFERENCES [units] ([id]),
 
 	-- combination of these two fields must be unique
-	unique(name, description)
+	unique(name)
 );
 
 CREATE TABLE [ingredients] (
 	[id] integer 				PRIMARY KEY,
 	[name] text					NOT NULL,
-	[description] text,
+	[short_name] text,
 	[unit_id] integer,
 	[unit_weight] real,
 	[density] real,
@@ -44,7 +43,7 @@ CREATE TABLE [ingredients] (
 	FOREIGN KEY ([unit_id]) REFERENCES [units] ([id]),
 
 	-- combination of these two fields must be unique
-	unique(name, description)
+	unique(name)
 
 	-- unit_weight and unit_id must both be either null or not null
 	CHECK ((unit_weight IS NULL AND unit_id IS NULL) OR (unit_weight IS NOT NULL and unit_id IS NOT NULL))
@@ -56,14 +55,17 @@ CREATE TABLE [ingredients] (
 CREATE TABLE [recipe_steps] (
 	[id] integer 				PRIMARY KEY,
 	[ingredient_id] integer,
-	[recipe_id] integer,
-	[step_id] integer,
+	[recipe_id] integer			NOT NULL,
+	[step_id] integer			NOT NULL,
+	[order] integer				NOT NULL,
 	[seconds] integer,
 	[weight] real,
 
 	FOREIGN KEY ([ingredient_id]) REFERENCES [ingredients] ([id])
 	FOREIGN KEY ([recipe_id]) REFERENCES [recipes] ([id])
 	FOREIGN KEY ([step_id]) REFERENCES [steps] ([id])
+
+	CHECK ((ingredient_id IS NULL AND weight IS NULL) OR (ingredient_id IS NOT NULL and weight IS NOT NULL))
 );
 
 -- this table is required by android
