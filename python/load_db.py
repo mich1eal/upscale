@@ -1,5 +1,6 @@
 import sqlite3
 import csv
+import xlrd
 from sqlite3 import Error
 
 # 
