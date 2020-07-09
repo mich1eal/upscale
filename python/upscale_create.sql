@@ -11,7 +11,7 @@ CREATE TABLE [units] (
 CREATE TABLE [steps] (
 	[id] integer 				PRIMARY KEY,
 	[step_type_id] integer,
-	[title] text				NOT NULL,
+	[title] text				NOT NULL		UNIQUE,
 	[subtitle] text,
 
 	FOREIGN KEY ([step_type_id]) REFERENCES [step_types] ([id])
