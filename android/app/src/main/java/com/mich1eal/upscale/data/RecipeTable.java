@@ -11,8 +11,7 @@ public class RecipeTable extends Table<Recipe>{
 
     private static RecipeTable Inst;
 
-    public RecipeTable(DBHelper db)
-    {
+    public RecipeTable(DBHelper db) {
         super(db, "RecipeTable");
         Inst = this;
     }

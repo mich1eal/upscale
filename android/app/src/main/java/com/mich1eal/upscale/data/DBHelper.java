@@ -33,6 +33,7 @@ public class DBHelper
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        RECIPE.onCreate(context, db);
 
     }
 
