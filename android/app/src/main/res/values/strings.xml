@@ -10,6 +10,8 @@
     <string name="battery_default">Scale battery level: not available</string>
 
 
+    <string name="start_text">Get started by selected a recipe.</string>
+
 
     <string name="status_connect">connected</string>
     <string name="status_searching">searching...</string>

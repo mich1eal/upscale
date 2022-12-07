@@ -28,7 +28,12 @@ public class Recipe extends DBResource{
     @Override
     public String getListName()
     {
-        return this.toString();
+        return this.name + "(serves " + this.servings + ')';
+    }
+
+    @Override
+    public String toString() {
+        return this.name + " (serves " + this.servings + ')';
     }
 
 }

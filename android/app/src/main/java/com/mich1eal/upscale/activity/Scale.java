@@ -6,21 +6,30 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.mich1eal.upscale.R;
 import com.mich1eal.upscale.BLEWrapper;
+import com.mich1eal.upscale.data.DBHelper;
+import com.mich1eal.upscale.data.Recipe;
 
 import org.w3c.dom.Text;
+
+import java.util.ArrayList;
 
 public class Scale extends Activity {
 
     private static final String TAG = Scale.class.getSimpleName();
     private static BLEWrapper bWrap;
+    private static DBHelper db;
 
     private static Button retryButton;
     private static TextView statusText, batteryText, weightText;
+    private static ListView recipeList;
 
 
     @Override
@@ -28,11 +37,30 @@ public class Scale extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scale);
 
+        // Setup db and BLE connections
+        db = new DBHelper(getApplicationContext());
+        ArrayList<Recipe> recipes = db.RECIPE.getAllRecipes();
+
+        //Handler is static to prevent memory leaks. See:
+        // http://stackoverflow.com/questions/11278875/handlers-and-memory-leaks-in-android
+        bWrap = new BLEWrapper(this, new BHandler());
+
+        bWrap.connect();
+
         statusText = (TextView) findViewById(R.id.control_status);
         weightText = (TextView) findViewById(R.id.weight_text);
         batteryText = (TextView) findViewById(R.id.battery_text);
 
         retryButton = (Button) findViewById(R.id.control_retry);
+        recipeList = (ListView) findViewById(R.id.list_recipes);
+
+        ListAdapter recipeAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_1, android.R.id.text1, recipes);
+
+        recipeList.setAdapter(recipeAdapter);
+
+
+
 
         retryButton.setOnClickListener(new View.OnClickListener()
         {
@@ -43,11 +71,8 @@ public class Scale extends Activity {
             }
         });
 
-        //Handler is static to prevent memory leaks. See:
-        // http://stackoverflow.com/questions/11278875/handlers-and-memory-leaks-in-android
-        bWrap = new BLEWrapper(this, new BHandler());
 
-        bWrap.connect();
+
     }
 
 

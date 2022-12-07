@@ -15,7 +15,7 @@ public abstract class Table<T extends DBResource>
     protected DBHelper helper;
     protected String tableName;
 
-    public static final String _ID = " _id ";
+    public static final String _ID = " id ";
     public static final String NUM = " INTEGER ";
     public static final String TXT = " TEXT ";
     public static final String DLM = ", ";
@@ -52,7 +52,8 @@ public abstract class Table<T extends DBResource>
 
     protected abstract ContentValues getContentValues(T object);
 
-    public final void onCreate(Context context, SQLiteDatabase db)
+    // This is not implemented because database is preloaded
+/*    public final void onCreate(Context context, SQLiteDatabase db)
     {
         Log.d(tableName, "Initializing...");
 
@@ -63,7 +64,7 @@ public abstract class Table<T extends DBResource>
         db.execSQL(tableSQL);
         initializeValues(context, db);
         isInitialized = true;
-    }
+    }*/
 
     protected void initializeValues(Context context, SQLiteDatabase db)
     {
