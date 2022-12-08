@@ -10,6 +10,8 @@
     <string name="battery_default">Scale battery level: not available</string>
 
 
+    <string name="start_text">Get started by selected a recipe.</string>
+
 
     <string name="status_connect">connected</string>
     <string name="status_searching">searching...</string>
@@ -20,5 +22,13 @@
     <string name="status_disabled">disabled</string>
     <string name="status_location_disabled">location permission required</string>
     <string name="status_not_available">device not supported</string>
+
+    <!-- Strings for recipe view -->
+
+    <string name="button_cancel">Cancel</string>
+    <string name="button_next">Next Step</string>
+    <string name="button_last">Last Step</string>
+    <string name="text_step_count">Loading</string>
+    <string name="text_step_title">Loading</string>
 
 </resources>
