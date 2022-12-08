@@ -8,10 +8,11 @@
     tools:context="com.mich1eal.upscale.activity.Scale">
 
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:layout_gravity="left">
+        android:layout_gravity="left"
+        android:layout_margin="10dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -63,27 +64,68 @@
         <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/start_text"
+        android:id="@+id/text_title"
         android:text="@string/start_text"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/battery_text"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"/>
+
 
         <ListView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/list_recipes"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/start_text"
-        android:layout_margin="10dp"/>
+        android:layout_below="@id/text_title"/>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/pane_recipe"
+            android:layout_below="@id/text_title"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/step_title"
+                android:text="@string/text_step_count"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_cancel"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:text="@string/button_cancel"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_next"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:text="@string/button_next"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/step_count"
+                android:text="@string/text_step_count"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_last"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:text="@string/button_last"/>
+        </RelativeLayout>
 
     </RelativeLayout>
-
-
-
-
-
-
-
-
 </android.support.constraint.ConstraintLayout>

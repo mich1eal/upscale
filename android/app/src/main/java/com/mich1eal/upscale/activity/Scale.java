@@ -1,15 +1,18 @@
 package com.mich1eal.upscale.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mich1eal.upscale.R;
@@ -27,9 +30,10 @@ public class Scale extends Activity {
     private static BLEWrapper bWrap;
     private static DBHelper db;
 
-    private static Button retryButton;
-    private static TextView statusText, batteryText, weightText;
+    private static Button retryButton, nextButton, lastButton, cancelButton;
+    private static TextView statusText, batteryText, weightText, stepCountText, stepTitleText, titleText;
     private static ListView recipeList;
+    private static RelativeLayout recipePane;
 
 
     @Override
@@ -39,7 +43,7 @@ public class Scale extends Activity {
 
         // Setup db and BLE connections
         db = new DBHelper(getApplicationContext());
-        ArrayList<Recipe> recipes = db.RECIPE.getAllRecipes();
+        final ArrayList<Recipe> recipes = db.RECIPE.getAllRecipes();
 
         //Handler is static to prevent memory leaks. See:
         // http://stackoverflow.com/questions/11278875/handlers-and-memory-leaks-in-android
@@ -50,17 +54,17 @@ public class Scale extends Activity {
         statusText = (TextView) findViewById(R.id.control_status);
         weightText = (TextView) findViewById(R.id.weight_text);
         batteryText = (TextView) findViewById(R.id.battery_text);
+        stepCountText = (TextView) findViewById(R.id.step_count);
+        stepTitleText = (TextView) findViewById(R.id.step_title);
+        titleText = (TextView) findViewById(R.id.text_title);
 
         retryButton = (Button) findViewById(R.id.control_retry);
+        nextButton = (Button) findViewById(R.id.button_next);
+        lastButton = (Button) findViewById(R.id.button_last);
+        cancelButton = (Button) findViewById(R.id.button_cancel);
+
         recipeList = (ListView) findViewById(R.id.list_recipes);
-
-        ListAdapter recipeAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, android.R.id.text1, recipes);
-
-        recipeList.setAdapter(recipeAdapter);
-
-
-
+        recipePane = (RelativeLayout) findViewById(R.id.pane_recipe);
 
         retryButton.setOnClickListener(new View.OnClickListener()
         {
@@ -70,16 +74,46 @@ public class Scale extends Activity {
                 bWrap.connect();
             }
         });
+        cancelButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                endRecipe();
+            }
+        });
 
+        ListAdapter recipeAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_1, android.R.id.text1, recipes);
 
-
+        recipeList.setAdapter(recipeAdapter);
+        recipeList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                Recipe recipe = recipes.get((int)id);
+                startRecipe(recipe);
+            }
+        });
     }
 
+    private static void startRecipe(Recipe recipe){
+        // change views to start recipe
+        recipeList.setVisibility(View.GONE);
+        recipePane.setVisibility(View.VISIBLE);
+        titleText.setText(recipe.name);
+    }
+
+    private static void endRecipe(){
+        // allow user to select another recipe
+        recipeList.setVisibility(View.VISIBLE);
+        recipePane.setVisibility(View.GONE);
+        titleText.setText(R.string.start_text);
+    }
 
     private static void updateWeight(double newWeight){
         weightText.setText("Scale weight reading: " + newWeight);
     }
-
 
     private static void updateBattery(double newBattery){
         batteryText.setText("Scale battery level: " + newBattery*100 + "%");
@@ -170,8 +204,6 @@ public class Scale extends Activity {
                     } else {
                         Log.e(TAG, "Error, unexpected value changed: " + msg.arg1);
                     }
-
-
                     break;
                 default:
                     Log.e(TAG, "Error, unknown message received");

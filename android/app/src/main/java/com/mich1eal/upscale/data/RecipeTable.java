@@ -58,6 +58,4 @@ public class RecipeTable extends Table<Recipe>{
 
         return recipes;
     }
-
-
 }
