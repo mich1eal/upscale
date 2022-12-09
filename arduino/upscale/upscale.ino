@@ -1,3 +1,5 @@
+#include <HX711.h>
+
 /*
     Michael Miller
     6/7/2020
@@ -28,7 +30,7 @@ bool deviceConnected = false;
 bool lastDeviceConnected = false;
 
 //determined using calibration script, returns weight in grams, not related to taring
-float calibration_factor = -443;
+float calibration_factor = -7050;//-443;
 
 //used for averaging and to determine whether or not to update weight
 float lastWeight = 0.0;
@@ -101,7 +103,7 @@ void setup() {
 }
 
 void loop() {
-  if (deviceConnected) {
+  if (true) {//(deviceConnected) {
     if (!lastDeviceConnected) {
       Serial.println("New device connection");
       digitalWrite(blueLED, HIGH);
