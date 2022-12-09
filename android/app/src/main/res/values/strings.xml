@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Upscale</string>
 
+    <string name="loading">Loading</string>
+
 
     <string name="bluetooth_status">Bluetooth: </string>
     <string name="bluetooth_settings">C</string>
@@ -9,8 +11,7 @@
     <string name="weight_default">Scale weight reading: not available</string>
     <string name="battery_default">Scale battery level: not available</string>
 
-
-    <string name="start_text">Get started by selected a recipe.</string>
+    <string name="start_text">Choose a recipe to begin</string>
 
 
     <string name="status_connect">connected</string>
@@ -26,9 +27,16 @@
     <!-- Strings for recipe view -->
 
     <string name="button_cancel">Cancel</string>
+    <string name="button_next_final">Finish Recipe</string>
     <string name="button_next">Next Step</string>
     <string name="button_last">Last Step</string>
-    <string name="text_step_count">Loading</string>
-    <string name="text_step_title">Loading</string>
+
+    <!-- Strings for timer view -->
+    <string name="timer_timer">00:00</string>
+    <string name="timer_start_start">Start</string>
+    <string name="timer_start_stop">Stop</string>
+    <string name="timer_reset">Reset</string>
+    <string name="weight_marker">                 ^</string>
+    <string name="weight_tare">Tare scale</string>
 
 </resources>

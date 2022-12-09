@@ -115,7 +115,7 @@ public class DBHelper
         while (c.moveToNext()) {
             final long id = c.getLong(0);
             final int stepOrder = c.getInt(c.getColumnIndex("step_order"));
-            final int seconds = c.getInt(c.getColumnIndex("seconds"));
+            final int seconds = (int) c.getLong(c.getColumnIndex("seconds"));
             final double weight = c.getDouble(c.getColumnIndex("weight"));
             final String type = c.getString(c.getColumnIndex("type"));
             final String ingredient = c.getString(c.getColumnIndex("ingredient"));

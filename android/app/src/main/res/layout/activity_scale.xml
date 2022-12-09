@@ -68,8 +68,9 @@
         android:text="@string/start_text"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/battery_text"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"/>
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="20dp"
+        android:textSize="30dp"/>
 
 
         <ListView
@@ -84,15 +85,29 @@
             android:layout_height="fill_parent"
             android:id="@+id/pane_recipe"
             android:layout_below="@id/text_title"
-            android:visibility="gone">
+            android:visibility="gone"
+            android:layout_margin="10dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/step_title"
-                android:text="@string/text_step_count"
+                android:text="@string/loading"
                 android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"/>
+                android:layout_alignParentLeft="true"
+                android:textSize="24dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/step_subtitle"
+                android:text="@string/loading"
+                android:layout_below="@id/step_title"
+                android:layout_alignParentLeft="true"
+                android:textSize="18dp"
+                android:layout_marginLeft="5dp"/>
 
             <Button
                 android:layout_width="wrap_content"
@@ -114,9 +129,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/step_count"
-                android:text="@string/text_step_count"
+                android:text="@string/loading"
                 android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"/>
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="15dp"/>
 
             <Button
                 android:layout_width="wrap_content"
@@ -125,6 +141,84 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
                 android:text="@string/button_last"/>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/timer_view"
+                android:layout_centerInParent="true"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/timer"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentTop="true"
+                    android:text="@string/timer_timer"
+                    android:textSize="100dp"/>
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/timer_start_toggle"
+                    android:layout_alignRight="@id/timer"
+                    android:layout_below="@id/timer"
+                    android:text="@string/timer_start_start"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/timer_reset"
+                    android:layout_alignLeft="@id/timer"
+                    android:layout_below="@id/timer"
+                    android:text="@string/timer_reset"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/scale_view"
+                android:layout_centerInParent="true"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/weight_weight"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentTop="true"
+                    android:text="@string/loading"
+                    android:textSize="100dp"/>
+
+                <SeekBar
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/weight_seek"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/weight_weight"
+                    android:clickable="false"
+                    android:focusable="false"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/weight_marker"
+                    android:layout_alignRight="@id/weight_seek"
+                    android:layout_below="@id/weight_seek"
+                    android:layout_marginRight="100dp"
+                    android:text="@string/weight_marker"
+                    android:textSize="24dp"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/weight_tare"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/weight_seek"
+                    android:text="@string/weight_tare"/>
+            </RelativeLayout>
+
         </RelativeLayout>
 
     </RelativeLayout>
