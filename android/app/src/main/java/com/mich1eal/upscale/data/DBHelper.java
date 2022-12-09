@@ -1,6 +1,7 @@
 package com.mich1eal.upscale.data;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -11,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 /**
  * Created by msmil on 12/17/2020.
@@ -20,7 +22,7 @@ public class DBHelper
         extends SQLiteOpenHelper{
     private static final String TAG = DBHelper.class.getSimpleName();
 
-    public static final String DB_NAME = "upscale.sqlite";
+    public static final String DB_NAME = "upscale.db";
     public static String DB_PATH = "/data/data/com.mich1eal.upscale/databases/";
     public static String FULL_PATH = DB_PATH + DB_NAME;
 
@@ -101,6 +103,28 @@ public class DBHelper
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
+    }
+
+    public ArrayList<Step> getStepsForRecipe(long recipe) {
+
+        String query = "SELECT * FROM recipe_steps WHERE recipe_id = " + recipe + " ORDER BY step_order;";
+        Cursor c = getDB().rawQuery(query, null);
+
+        // iterate through cursor and add all to output
+        ArrayList<Step> steps = new ArrayList<Step>();
+        while (c.moveToNext()) {
+            final long id = c.getLong(0);
+            final int stepOrder = c.getInt(c.getColumnIndex("step_order"));
+            final int seconds = c.getInt(c.getColumnIndex("seconds"));
+            final double weight = c.getDouble(c.getColumnIndex("weight"));
+            final String type = c.getString(c.getColumnIndex("type"));
+            final String ingredient = c.getString(c.getColumnIndex("ingredient"));
+
+            steps.add(new Step(id, recipe, stepOrder, seconds, weight, type, ingredient));
+        }
+
+        c.close();
+        return steps;
     }
 
 }

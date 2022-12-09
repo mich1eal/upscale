@@ -1,12 +1,11 @@
 import sqlite3
-import csv
 import xlrd
 from sqlite3 import Error
 from os.path import isfile
 
 
 database = r'data\out\upscale.db'
-dataSource = r'data_builder.xlsx'
+dataSource = r'data_builder.xls'
 
 
 SHEET_UNITS = 'units'
@@ -69,7 +68,7 @@ def getIDs(conn, key, table):
 
 def getInsertString(valueDict, table):
     headers = valueDict.keys()
-    vals = valueDict.values()
+    vals = [str(value) for value in valueDict.values()]
     
     sqlStart = 'INSERT INTO '
     sqlMid1 ='('
@@ -147,55 +146,12 @@ def main():
         return
     
     xlDoc = xlrd.open_workbook(dataSource)
-    
-    # PARSE UNITS
-    sheetName = SHEET_UNITS
-    (headers, rows) = splitRowHeaders(xlDoc, sheetName)
-    for row in rows:
-        valueDict = defaultParse(headers, row)
-        execute_sql(conn, getInsertString(valueDict, sheetName))
-        
-    unitDict = getIDs(conn, 'name', SHEET_UNITS)
-    print(unitDict)
-    
-    
-    # PARSE INGREDIENTS
-    sheetName = SHEET_INGREDIENTS
-    (headers, rows) = splitRowHeaders(xlDoc, sheetName)
-    for row in rows:
-        valueDict = defaultParse(headers, row)
-        valueDict = insertForeignKeys('unit_id', unitDict, valueDict)
-        execute_sql(conn, getInsertString(valueDict, sheetName))
-        
-    commit(conn)
-    
-    # PARSE STEP_TYPES
-    sheetName = SHEET_STEP_TYPES
-    (headers, rows) = splitRowHeaders(xlDoc, sheetName)
-    for row in rows:
-        valueDict = defaultParse(headers, row)
-        execute_sql(conn, getInsertString(valueDict, sheetName))
-    commit(conn)
-    stepTypeDict = getIDs(conn, 'name', SHEET_STEP_TYPES)
-    print(stepTypeDict)
-    
-    # PARSE STEPS
-    sheetName = SHEET_STEPS
-    (headers, rows) = splitRowHeaders(xlDoc, sheetName)
-    for row in rows:
-        valueDict = defaultParse(headers, row)
-        valueDict = insertForeignKeys('step_type_id', stepTypeDict, valueDict)
-        execute_sql(conn, getInsertString(valueDict, sheetName))
-    commit(conn)
-    stepDict = getIDs(conn, 'title', SHEET_STEPS)
-    print(stepDict)
-    
+             
     # PARSE RECIPES
     sheetName = SHEET_RECIPES
     (headers, rows) = splitRowHeaders(xlDoc, sheetName)
     for row in rows:
         valueDict = defaultParse(headers, row)
-        valueDict = insertForeignKeys('unit_id', unitDict, valueDict)
         execute_sql(conn, getInsertString(valueDict, sheetName))
     commit(conn)
     recipeDict = getIDs(conn, 'name', SHEET_RECIPES)
@@ -205,74 +161,33 @@ def main():
     # PARSE RECIPES_STEPS
     sheetName = SHEET_RECIPE_STEPS
     (headers, rows) = splitRowHeaders(xlDoc, sheetName)
-    recipePos = 0 
-    recipeValid = True
+    recipePos = 0.0
     lastRecipe = None
     
     for row in rows:
         valueDict = defaultParse(headers, row)
+        valueDict['step_order'] = recipePos
         
         currentRecipe = valueDict['recipe_id']
-        #new recipe
-        if currentRecipe != lastRecipe:
-            #if all steps were valid for last recipe, commit it: 
-                
+        
+        value_dict = insertForeignKeys('recipe_id', recipeDict, valueDict)
+        
+        execute_sql(conn, getInsertString(valueDict, sheetName))
+        
+        
+        if lastRecipe and currentRecipe != lastRecipe:
             lastRecipe = currentRecipe
-            recipeValid = True
-            recipePos = 0
-                    
-        
-        
-        valueDict = insertForeignKeys('unit_id', unitDict, valueDict)
-        
-        
+            recipePos = 0.0
+        else:
+            recipePos += 1
+               
     commit(conn)
-
+    conn.close()
 
 
     return 
     
-    stepTypeDict = {}
-    unitDict = {}
-
-    for table in tables: 
-        filePath = 'data\\in\\' + table + '.csv'
-
-        with open(filePath, 'r') as file:
-            reader = csv.reader(file)
-            headers = next(reader)
-
-            #Iterate through row and build SQL statement 
-            for row in reader: 
-
-                #We will use this to build our SQL insert statement 
-                cols = []
-                vals = []
-
-                
-                # create tables
-                if conn is not None:
-                    # print(sqlString)
-                    execute_sql(conn, sqlString)
-
-                else:
-                    print("Error! cannot create the database connection.")
-
-
-            print("Attempting to commit changes")
-            if conn is not None:
-                # print(sqlString)
-                conn.commit()
-
-            else:
-                print("Error! cannot create the database connection.")
-
-        # After updating db, get list of IDs for foreign keys
-        if table == 'step_types':
-            stepTypeDict = getStepTypeIDs(conn)
-
-        if table == 'units':
-            unitDict = getUnitIDs(conn)
+    
 
 
 

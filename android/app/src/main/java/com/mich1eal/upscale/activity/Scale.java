@@ -19,6 +19,7 @@ import com.mich1eal.upscale.R;
 import com.mich1eal.upscale.BLEWrapper;
 import com.mich1eal.upscale.data.DBHelper;
 import com.mich1eal.upscale.data.Recipe;
+import com.mich1eal.upscale.data.Step;
 
 import org.w3c.dom.Text;
 
@@ -34,6 +35,10 @@ public class Scale extends Activity {
     private static TextView statusText, batteryText, weightText, stepCountText, stepTitleText, titleText;
     private static ListView recipeList;
     private static RelativeLayout recipePane;
+
+    // state variables
+    private static int currentStep = 0;
+    private static ArrayList<Step> steps;
 
 
     @Override
@@ -102,6 +107,11 @@ public class Scale extends Activity {
         recipeList.setVisibility(View.GONE);
         recipePane.setVisibility(View.VISIBLE);
         titleText.setText(recipe.name);
+
+        steps = db.getStepsForRecipe(recipe.getID());
+        for (Step step : steps) {
+            Log.d(TAG, step.type);
+        }
     }
 
     private static void endRecipe(){
@@ -114,6 +124,11 @@ public class Scale extends Activity {
     private static void updateWeight(double newWeight){
         weightText.setText("Scale weight reading: " + newWeight);
     }
+
+    private static void changeStep(int newStep) {
+
+    }
+
 
     private static void updateBattery(double newBattery){
         batteryText.setText("Scale battery level: " + newBattery*100 + "%");
