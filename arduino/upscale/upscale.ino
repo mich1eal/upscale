@@ -1,5 +1,3 @@
-#include <HX711.h>
-
 /*
     Michael Miller
     6/7/2020
@@ -103,7 +101,7 @@ void setup() {
 }
 
 void loop() {
-  if (true) {//(deviceConnected) {
+  if (deviceConnected) {
     if (!lastDeviceConnected) {
       Serial.println("New device connection");
       digitalWrite(blueLED, HIGH);
